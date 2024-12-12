@@ -193,8 +193,6 @@ inline T* MemoryPool<T, bPlacementNew>::Alloc(void)
     Node<T>* currentNode;
     UINT64 nextNode;
     UINT64 currentTop;
-    UINT64 newTop;
-    UINT64 stValue = InterlockedIncrement(&stamp);
 
     while (true) {
         currentTop = top;

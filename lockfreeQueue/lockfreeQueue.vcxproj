@@ -133,9 +133,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CircularQueue.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CircularQueue.h" />
     <ClInclude Include="lockfree_queue.h" />
     <ClInclude Include="concurrent_stack.h" />
     <ClInclude Include="MemoryPool.h" />
