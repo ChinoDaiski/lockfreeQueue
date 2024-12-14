@@ -1,6 +1,6 @@
 #pragma once
 
-#define CQSIZE 100000
+#define CQSIZE 20000
 
 #include <Windows.h>
 

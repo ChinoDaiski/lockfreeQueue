@@ -57,6 +57,7 @@ private:
         Node(T _data = 0, UINT64 _next = 0) : data{ _data }, next{ 0 } {}
     };
 
+public:
     struct AddressConverter {
         static constexpr UINT64 POINTER_MASK = 0x00007FFFFFFFFFFF; // 하위 47비트
         static constexpr UINT64 STAMP_SHIFT = 47;
@@ -77,6 +78,7 @@ private:
     //    return InterlockedCompareExchange64(reinterpret_cast<LONG64*>(target), desired, expected) == expected;
     //}
 
+private:
     // CAS 함수 구현
     bool CAS(Node** target, Node* old_value, Node* new_value) {
         // 포인터를 64비트 정수로 변환
@@ -91,8 +93,9 @@ private:
     }
 
 
-    bool CAS(UINT64* target, UINT64 expected, UINT64 desired) {
-        return InterlockedCompareExchange64(reinterpret_cast<LONG64*>(target), desired, expected) == expected;
+    bool CAS(UINT64* target, UINT64 expected, UINT64 desired, UINT64& returnValue) {
+        returnValue = InterlockedCompareExchange64(reinterpret_cast<LONG64*>(target), desired, expected);
+        return returnValue == expected;
     }
 
 
@@ -103,6 +106,8 @@ public:
         pNode->next = NULL;
         _head = AddressConverter::AddStamp(pNode, stamp);
         _tail = _head;
+
+        bError = 1;
     }
 
     ~lockfree_queue() {
@@ -114,6 +119,9 @@ public:
 
     void enqueue(const T& value)
     {
+        if (InterlockedCompareExchange(&bError, 0, 0) == 0)
+            return;
+
         DWORD curThreadID = GetCurrentThreadId();
 
         Node* node = pool.Alloc();
@@ -157,7 +165,8 @@ public:
             // 기존 꼬리 부분의 노드 추출
             Node* tailNode = AddressConverter::ExtractNode(tail);
             UINT64 tailNext = tailNode->next;
-            Node* tailNodeNext = AddressConverter::ExtractNode(tailNext);
+            Node* tailNextNode = AddressConverter::ExtractNode(tailNext);
+
 
             logQueue.enqueue(DebugNode{
                  tail,
@@ -180,7 +189,7 @@ public:
             );
 
             // 우선 다음 노드가 비어 있는, 현재 꼬리가 진짜 꼬리인지 확인. 그 사이 다른 스레드가 추가했을 수 도 있으니
-            if (tailNodeNext == NULL)
+            if (tailNextNode == NULL)
             {
                 logQueue.enqueue(DebugNode{
                     tailNext,
@@ -202,12 +211,23 @@ public:
                     }
                 );
 
-                // tail의 next가 null일 경우 새로 추가한 노드를 tail의 next에 대입
-                bSuccess = CAS(&tailNode->next, tailNext, newNode);
 
+                //======================================================================
+                // 1번 CAS
+                //======================================================================
+                // tail의 next가 null일 경우 새로 추가한 노드를 tail의 next에 대입
+                // 이 순간 캡쳐된 tailNode->next 값이 retval
+                UINT64 retval = InterlockedCompareExchange64(reinterpret_cast<LONG64*>(&tailNode->next), newNode, NULL);
+                if (retval == NULL)
+                    bSuccess = true;
+                else
+                    bSuccess = false;
+
+                //bSuccess = CAS(&tailNode->next, NULL, newNode);
+                
                 logQueue.enqueue(DebugNode{ 
-                    tailNode->next,
-                    tailNext,
+                    retval,
+                    NULL,
                     newNode,
                     ACTION::ENQ_TRY_CAS_ONE,
                     curThreadID,
@@ -216,15 +236,19 @@ public:
                 );
 
                 thread_debugQueue.enqueue(DebugNode{
-                    tailNode->next,
-                    tailNext,
+                    retval,
+                    NULL,
                     newNode,
                     ACTION::ENQ_TRY_CAS_ONE,
                     curThreadID,
                     bSuccess,
                     }
                 );
+                
+                if (InterlockedCompareExchange(&bError, 0, 0) == 0)
+                    return;
 
+                // 1번 CAS 성공시
                 if (bSuccess)
                 {
                     logQueue.enqueue(DebugNode{
@@ -247,11 +271,21 @@ public:
                         }
                     );
 
+                    if (InterlockedCompareExchange(&bError, 0, 0) == 0)
+                        return;
+
+
+                    UINT64 retval = InterlockedCompareExchange64(reinterpret_cast<LONG64*>(&_tail), newNode, tail);
+                    if (retval == tail)
+                        bSuccess = true;
+                    else
+                        bSuccess = false;
+
                     // 이후 자료구조의 tail이 새로 추가된 노드를 가리키도록 함.
-                    bSuccess = CAS(&_tail, tail, newNode); //<< 실패의 경우 그 이유 추적
+                    //bSuccess = CAS(&_tail, tail, newNode); // << 실패의 경우 그 이유 추적
 
                     logQueue.enqueue(DebugNode{
-                        _tail,
+                        retval,
                         tail,
                         newNode,
                         ACTION::ENQ_TRY_CAS_TWO,
@@ -261,7 +295,7 @@ public:
                     );
 
                     thread_debugQueue.enqueue(DebugNode{
-                        _tail,
+                        retval,
                         tail,
                         newNode,
                         ACTION::ENQ_TRY_CAS_TWO,
@@ -269,33 +303,44 @@ public:
                         bSuccess,
                         }
                     );
+                    
+                    if (InterlockedCompareExchange(&bError, 0, 0) == 0)
+                        return;
 
                     break;
                 }
             }
             else
             {
+                // 이미 tail의 next node가 NULL이 아님. 그래서 _tail값을 다음으로 옮겨야함.
+                //CAS(&_tail, tail, tailNext);
+
+                UINT64 retval = InterlockedCompareExchange64(reinterpret_cast<LONG64*>(&_tail), tailNext, tail);
+                if (retval == tail)
+                    bSuccess = true;
+                else
+                    bSuccess = false;
+
                 logQueue.enqueue(DebugNode
                     {
+                        retval,
                         tail,
-                        NULL,
-                        reinterpret_cast<UINT64>(tailNodeNext),
+                        tailNext,
                         ACTION::ENQ_TAIL_NEXT_NOT_NULL,
                         curThreadID,
-                        FALSE,
+                        bSuccess,
                     }
                 );
 
                 thread_debugQueue.enqueue(DebugNode{
+                    retval,
                     tail,
-                    NULL,
-                    reinterpret_cast<UINT64>(tailNodeNext),
+                    tailNext,
                     ACTION::ENQ_TAIL_NEXT_NOT_NULL,
                     curThreadID,
-                    FALSE,
+                    bSuccess,
                     });
             }
-
 
             UINT32 index = InterlockedIncrement(&bRepeat);
 
@@ -306,8 +351,9 @@ public:
                 exit(-1);
             }
         }
+
         //Q_SIZE
-        UINT32 q_size = InterlockedIncrement(&_size);
+        long q_size = InterlockedIncrement(&_size);
         logQueue.enqueue(
             DebugNode{
                         0,
@@ -332,6 +378,9 @@ public:
     }
 
     bool dequeue(T& value) {
+        if (InterlockedCompareExchange(&bError, 0, 0) == 0)
+            return false;
+
         DWORD curThreadID = GetCurrentThreadId();
         bool bSuccess = false;
 
@@ -355,9 +404,13 @@ public:
             }
         );
 
-        UINT32 qSize = InterlockedCompareExchange(&_size, 0, 0);
+        //UINT32 qSize = InterlockedCompareExchange(&_size, 0, 0);
 
-        if (qSize == 0)
+        // 일단 deq 하러 들어왔다는 것은 _size를 감소시키러 왔단 의미. 그러므로 일단 1 감소시키고 판별
+        long qSize = InterlockedDecrement(&_size);
+
+        // 만약 감소된 _size가 0보다 작다면 비었다는 의미
+        if (qSize < 0)
         {
             logQueue.enqueue(DebugNode{
                 0,
@@ -379,11 +432,33 @@ public:
                 }
             );
 
+            InterlockedExchange(&bError, 0);
+
+            // 1 증가시킴.
+            InterlockedIncrement(&_size);
             return FALSE;
         }
 
+
         while (true)
         {
+            UINT64 tail = _tail;         // tail 값 가져옴
+
+            // 기존 꼬리 부분의 노드 추출
+            Node* tailNode = AddressConverter::ExtractNode(tail);
+            UINT64 tailNext = tailNode->next;
+            Node* tailNextNode = AddressConverter::ExtractNode(tailNext);
+
+            // if tailNext가 0이 아니라면 옮김.
+            if (tailNextNode != NULL)
+            {
+                UINT64 retval = InterlockedCompareExchange64(reinterpret_cast<LONG64*>(&_tail), tailNext, tail);
+                continue;
+            }
+
+
+
+
             UINT64 head = _head;         // 헤드 값 가져옴
 
             Node* headNode = AddressConverter::ExtractNode(head);
@@ -434,6 +509,13 @@ public:
                     }
                 );
 
+                // 현재 노드 갯수가 0이 아니라면? 재시도
+                qSize = InterlockedCompareExchange(&_size, 0, 0);
+                if (qSize >= 0)
+                    continue;
+
+                InterlockedExchange(&bError, 0);
+
                 return FALSE;   // 비어 있다는 의미니깐 deq 실패
             }
             else
@@ -460,10 +542,16 @@ public:
 
                 // next가 null이 아니란 것은 노드가 존재한다는 것이니 획득 시도
 
-                bSuccess = CAS(&_head, head, headNext); // head와 
+                //bSuccess = CAS(&_head, head, headNext); // head와 
+
+                UINT64 retval = InterlockedCompareExchange64(reinterpret_cast<LONG64*>(&_head), headNext, head);
+                if (retval == head)
+                    bSuccess = true;
+                else
+                    bSuccess = false;
 
                 logQueue.enqueue(DebugNode{
-                    _head,
+                    retval,
                     head,
                     headNext,
                     ACTION::DEQ_TRY_CAS,
@@ -473,7 +561,7 @@ public:
                 );
 
                 thread_debugQueue.enqueue(DebugNode{
-                    _head,
+                    retval,
                     head,
                     headNext,
                     ACTION::DEQ_TRY_CAS,
@@ -488,7 +576,7 @@ public:
                     pool.Free(headNode);
 
                     logQueue.enqueue(DebugNode{
-                        _head,
+                        retval,
                         head,
                         headNext,
                         ACTION::DEQ_SUCCESS_CAS,
@@ -498,7 +586,7 @@ public:
                     );
 
                     thread_debugQueue.enqueue(DebugNode{
-                        _head,
+                        retval,
                         head,
                         headNext,
                         ACTION::DEQ_SUCCESS_CAS,
@@ -512,15 +600,16 @@ public:
             }
         }
 
+
+
         //Q_SIZE
-        UINT32 q_size = InterlockedDecrement(&_size);
 
         logQueue.enqueue(
             DebugNode{
                         0,
                         0,
                         0,
-                        (ACTION)((UINT32)ACTION::Q_SIZE + q_size),
+                        (ACTION)((UINT32)ACTION::Q_SIZE + qSize),
                         curThreadID,
                         FALSE,
             }
@@ -531,7 +620,7 @@ public:
                         0,
                         0,
                         0,
-                        (ACTION)((UINT32)ACTION::Q_SIZE + q_size),
+                        (ACTION)((UINT32)ACTION::Q_SIZE + qSize),
                         curThreadID,
                         FALSE,
             }
@@ -554,9 +643,12 @@ private:
 
     MemoryPool<Node, false> pool;
 
-private:
-    UINT32 _size;
+public:
+    long _size;
 
     UINT64 _head;
     UINT64 _tail;
+
+    UINT64 bError;
 };
+

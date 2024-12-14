@@ -1,0 +1,98 @@
+
+61181. Action: ENQ_TAIL_NEXT_NOT_NULL	Thread: 6672	CAS Success: No	Old_____: a501e1ba6f1170	Expected: 0		New_____: 1e1ba6f1010
+61182. Action: ENQ_START___________	Thread: 7016	CAS Success: No	Old_____: a681e1ba6f1050	Expected: 0		New_____: 0	
+61183. Action: ENQ_CHECK_NULL___	Thread: 6672	CAS Success: No	Old_____: a601e1ba6f1010	Expected: 0		New_____: 0	
+61184. Action: ENQ_CHECK_NULL___	Thread: 7016	CAS Success: No	Old_____: a601e1ba6f1010	Expected: 0		New_____: 0	
+61185. Action: ENQ_TRY_CAS_ONE_BEFORE	Thread: 7016	CAS Success: No	Old_____: 0			Expected: 0		New_____: a681e1ba6f1050
+61186. Action: ENQ_TRY_CAS_ONE_BEFORE	Thread: 6672	CAS Success: No	Old_____: 0			Expected: 0		New_____: a581e1ba6f0e90
+61187. Action: ENQ_TRY_CAS_ONE__	Thread: 7016	CAS Success: Yes	Old_____: a681e1ba6f1050	Expected: 0		New_____: a681e1ba6f1050
+61188. Action: ENQ_TRY_CAS_TWO_BEFORE	Thread: 7016	CAS Success: Yes	Old_____: a601e1ba6f1010	Expected: a601e1ba6f1010	New_____: a681e1ba6f1050
+61189. Action: ENQ_TRY_CAS_TWO__	Thread: 7016	CAS Success: Yes	Old_____: a681e1ba6f1050	Expected: a601e1ba6f1010	New_____: a681e1ba6f1050
+61190. Action: Q_SIZE : 3
+61191. Action: ENQ_START___________	Thread: 7016	CAS Success: No	Old_____: a701e1ba6f1290	Expected: 0		New_____: 0	
+61192. Action: ENQ_CHECK_NULL___	Thread: 7016	CAS Success: No	Old_____: a681e1ba6f1050	Expected: 0		New_____: 0	
+61193. Action: ENQ_TRY_CAS_ONE_BEFORE	Thread: 7016	CAS Success: No	Old_____: 0			Expected: 0		New_____: a701e1ba6f1290
+61194. Action: ENQ_TRY_CAS_ONE__	Thread: 7016	CAS Success: Yes	Old_____: a701e1ba6f1290	Expected: 0		New_____: a701e1ba6f1290
+61195. Action: ENQ_TRY_CAS_TWO_BEFORE	Thread: 7016	CAS Success: Yes	Old_____: a681e1ba6f1050	Expected: a681e1ba6f1050	New_____: a701e1ba6f1290
+61196. Action: ENQ_TRY_CAS_TWO__	Thread: 7016	CAS Success: Yes	Old_____: a701e1ba6f1290	Expected: a681e1ba6f1050	New_____: a701e1ba6f1290
+61197. Action: Q_SIZE : 4
+61198. Action: DEQ_START__________	Thread: 7016	CAS Success: No	Old_____: 0			Expected: 0		New_____: 0	
+61199. Action: DEQ_TRY_NULL_CHECK	Thread: 7016	CAS Success: No	Old_____: a481e1ba6f0ed0	Expected: a501e1ba6f1170	New_____: 0	
+61200. Action: DEQ_TRY_CAS_BEFORE	Thread: 7016	CAS Success: No	Old_____: a481e1ba6f0ed0	Expected: a481e1ba6f0ed0	New_____: a501e1ba6f1170
+61201. Action: DEQ_TRY_CAS______	Thread: 7016	CAS Success: Yes	Old_____: a501e1ba6f1170	Expected: a481e1ba6f0ed0	New_____: a501e1ba6f1170
+61202. Action: DEQ_SUCCESS_CAS__	Thread: 7016	CAS Success: Yes	Old_____: a501e1ba6f1170	Expected: a481e1ba6f0ed0	New_____: a501e1ba6f1170
+61203. Action: Q_SIZE : 3
+61204. Action: DEQ_START__________	Thread: 7016	CAS Success: No	Old_____: 0			Expected: 0		New_____: 0	
+61205. Action: DEQ_TRY_NULL_CHECK	Thread: 7016	CAS Success: No	Old_____: a501e1ba6f1170	Expected: a601e1ba6f1010	New_____: 0	
+61206. Action: DEQ_TRY_CAS_BEFORE	Thread: 7016	CAS Success: No	Old_____: a501e1ba6f1170	Expected: a501e1ba6f1170	New_____: a601e1ba6f1010
+61207. Action: DEQ_TRY_CAS______	Thread: 7016	CAS Success: Yes	Old_____: a601e1ba6f1010	Expected: a501e1ba6f1170	New_____: a601e1ba6f1010
+61208. Action: DEQ_SUCCESS_CAS__	Thread: 7016	CAS Success: Yes	Old_____: a601e1ba6f1010	Expected: a501e1ba6f1170	New_____: a601e1ba6f1010
+61209. Action: Q_SIZE : 2
+61210. Action: DEQ_START__________	Thread: 7016	CAS Success: No	Old_____: 0			Expected: 0		New_____: 0	
+61211. Action: DEQ_TRY_NULL_CHECK	Thread: 7016	CAS Success: No	Old_____: a601e1ba6f1010	Expected: a681e1ba6f1050	New_____: 0	
+61212. Action: DEQ_TRY_CAS_BEFORE	Thread: 7016	CAS Success: No	Old_____: a601e1ba6f1010	Expected: a601e1ba6f1010	New_____: a681e1ba6f1050
+61213. Action: DEQ_TRY_CAS______	Thread: 7016	CAS Success: Yes	Old_____: a681e1ba6f1050	Expected: a601e1ba6f1010	New_____: a681e1ba6f1050
+61214. Action: DEQ_SUCCESS_CAS__	Thread: 7016	CAS Success: Yes	Old_____: a681e1ba6f1050	Expected: a601e1ba6f1010	New_____: a681e1ba6f1050
+61215. Action: Q_SIZE : 1
+61216. Action: ENQ_START___________	Thread: 7016	CAS Success: No	Old_____: a781e1ba6f1010	Expected: 0		New_____: 0	
+61217. Action: ENQ_CHECK_NULL___	Thread: 7016	CAS Success: No	Old_____: a701e1ba6f1290	Expected: 0		New_____: 0	
+61218. Action: ENQ_TRY_CAS_ONE_BEFORE	Thread: 7016	CAS Success: No	Old_____: 0			Expected: 0		New_____: a781e1ba6f1010
+61219. Action: ENQ_TRY_CAS_ONE__	Thread: 7016	CAS Success: Yes	Old_____: a781e1ba6f1010	Expected: 0		New_____: a781e1ba6f1010
+61220. Action: ENQ_TRY_CAS_TWO_BEFORE	Thread: 7016	CAS Success: Yes	Old_____: a701e1ba6f1290	Expected: a701e1ba6f1290	New_____: a781e1ba6f1010
+61221. Action: ENQ_TRY_CAS_TWO__	Thread: 7016	CAS Success: Yes	Old_____: a781e1ba6f1010	Expected: a701e1ba6f1290	New_____: a781e1ba6f1010
+61222. Action: Q_SIZE : 2
+61223. Action: ENQ_START___________	Thread: 7016	CAS Success: No	Old_____: a801e1ba6f1170	Expected: 0		New_____: 0	
+61224. Action: ENQ_CHECK_NULL___	Thread: 7016	CAS Success: No	Old_____: a781e1ba6f1010	Expected: 0		New_____: 0	
+61225. Action: ENQ_TRY_CAS_ONE_BEFORE	Thread: 7016	CAS Success: No	Old_____: 0			Expected: 0		New_____: a801e1ba6f1170
+61226. Action: ENQ_TRY_CAS_ONE__	Thread: 6672	CAS Success: Yes	Old_____: a581e1ba6f0e90	Expected: 0		New_____: a581e1ba6f0e90
+61227. Action: ENQ_TRY_CAS_ONE__	Thread: 7016	CAS Success: No	Old_____: a581e1ba6f0e90	Expected: 0		New_____: a801e1ba6f1170
+61228. Action: ENQ_CHECK_NULL___	Thread: 7016	CAS Success: No	Old_____: a781e1ba6f1010	Expected: 0		New_____: a581e1ba6f0e90
+61229. Action: ENQ_TAIL_NEXT_NOT_NULL	Thread: 7016	CAS Success: No	Old_____: a781e1ba6f1010	Expected: 0		New_____: 1e1ba6f0e90
+61230. Action: ENQ_TRY_CAS_TWO_BEFORE	Thread: 6672	CAS Success: Yes	Old_____: a781e1ba6f1010	Expected: a601e1ba6f1010	New_____: a581e1ba6f0e90
+61231. Action: ENQ_CHECK_NULL___	Thread: 7016	CAS Success: No	Old_____: a781e1ba6f1010	Expected: 0		New_____: a581e1ba6f0e90
+61232. Action: ENQ_TRY_CAS_TWO__	Thread: 6672	CAS Success: No	Old_____: a781e1ba6f1010	Expected: a601e1ba6f1010	New_____: a581e1ba6f0e90
+61233. Action: ENQ_TAIL_NEXT_NOT_NULL	Thread: 7016	CAS Success: No	Old_____: a781e1ba6f1010	Expected: 0		New_____: 1e1ba6f0e90
+61234. Action: Q_SIZE : 3
+61235. Action: ENQ_CHECK_NULL___	Thread: 7016	CAS Success: No	Old_____: a781e1ba6f1010	Expected: 0		New_____: a581e1ba6f0e90
+61236. Action: ENQ_TAIL_NEXT_NOT_NULL	Thread: 7016	CAS Success: No	Old_____: a781e1ba6f1010	Expected: 0		New_____: 1e1ba6f0e90
+61237. Action: ENQ_CHECK_NULL___	Thread: 7016	CAS Success: No	Old_____: a781e1ba6f1010	Expected: 0		New_____: a581e1ba6f0e90
+61238. Action: ENQ_START___________	Thread: 6672	CAS Success: No	Old_____: a881e1ba6f0ed0	Expected: 0		New_____: 0	
+61239. Action: ENQ_TAIL_NEXT_NOT_NULL	Thread: 7016	CAS Success: No	Old_____: a781e1ba6f1010	Expected: 0		New_____: 1e1ba6f0e90
+
+
+
+
+
+
+
+
+Thread: 6672
+캡처한 tail이	a601e1ba6f1010
+next가		0
+새로 추가할 노드가 	a581e1ba6f0e90
+
+
+61226. Action: ENQ_TRY_CAS_ONE__	Thread: 6672	CAS Success: Yes	Old_____: a581e1ba6f0e90	Expected: 0		New_____: a581e1ba6f0e90
+1번 CAS 성공, tail의 next에 a581e1ba6f0e90 추가
+
+
+61232. Action: ENQ_TRY_CAS_TWO__	Thread: 6672	CAS Success: No	Old_____: a781e1ba6f1010	Expected: a601e1ba6f1010	New_____: a581e1ba6f0e90
+현재 tail이 		a781e1ba6f1010
+캡처한 tail이 	a601e1ba6f1010
+새로 추가된 노드가	a581e1ba6f0e90
+
+
+
+
+
+스레드 A에서 tail 캡처, next 
+
+
+
+enq에서 cas를 2번한다. 1번은 새로운 노드를 1번, tail을 새로운 노드로 옮기는데 1번, 총 2번
+
+그런데 한 노드에서 tail을 옮길때 tail의 next가 0이라서 새로운 노드를 추가하는 것까진 성공했는데, tail값을 옮기려니 이미 재활용된 노드라서 tail을 옮기지 못한 상황이 나온다. 이를 해결하기 위해 tail의 next가 nullptr이 아닌 새로운 노드가 추가된 상황이라면 노드를 옮겨주기로 했다.
+
+
+
+

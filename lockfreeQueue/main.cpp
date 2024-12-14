@@ -93,13 +93,14 @@ void handler(void)
         case ACTION::END:
             break;
         default:
+            outFile << "\t";
             break;
         }
 
         if ((UINT32)(node.action) >= 90)
         {
             // 갯수 관련
-            outFile << "Q_SIZE : " << ((UINT32)(node.action) - 100) << std::endl;
+            outFile << "\t\tThread: " << std::dec << node.threadId << "\tQ_SIZE : " << ((UINT32)(node.action) - 100) << std::endl;
             continue;
         }
 
@@ -132,6 +133,60 @@ void handler(void)
     outFile << "Thread ID : " << std::dec << curThreadID << " occured errors" << std::endl << std::endl;
 
 
+
+
+    // _head 부터 null이 나올 때 까지
+    // _tail 부터 null이 나올 때 까지 반복
+    // 근데 _head와 _tail이 이어지면 문제가 되기에 반복하면서 같은 값이 나온다면 'loop occured!' 출력 
+
+    outFile << "_head : ";
+    
+    UINT64 head = g_Queue._head;
+    UINT64 firstHead = head;
+    while (true)
+    {
+        outFile << std::hex << head << " -> ";
+        
+        if (head == NULL)
+            break;
+
+        head = lockfree_queue<int>::AddressConverter::ExtractNode(head)->next;
+
+        if (firstHead == head)
+        {
+            outFile << "loop occurred!" << std::endl;
+            break;
+        }
+    }
+    outFile << std::endl << std::endl;
+
+
+
+    outFile << "_tail : ";
+
+    UINT64 tail = g_Queue._tail;
+    UINT64 firstTail = tail;
+    while (true)
+    {
+        outFile << std::hex << tail << " -> ";
+
+        if (tail == NULL)
+            break;
+
+        tail = lockfree_queue<int>::AddressConverter::ExtractNode(tail)->next;
+
+        if (firstTail == tail)
+        {
+            outFile << "loop occurred!" << std::endl;
+            break;
+        }
+    }
+    outFile << std::endl << std::endl;
+
+
+
+
+
     // 마지막 1000개의 로그 출력
     
     
@@ -153,11 +208,20 @@ void handler(void)
             case ACTION::ENQ_CHECK_NULL:
                 outFile << "ENQ_CHECK_NULL___";
                 break;
+            case ACTION::ENQ_TRY_CAS_ONE_BEFORE:
+                outFile << "ENQ_TRY_CAS_ONE_BEFORE";
+                break;
             case ACTION::ENQ_TRY_CAS_ONE:
                 outFile << "ENQ_TRY_CAS_ONE__";
                 break;
+            case ACTION::ENQ_TRY_CAS_TWO_BEFORE:
+                outFile << "ENQ_TRY_CAS_TWO_BEFORE";
+                break;
             case ACTION::ENQ_TRY_CAS_TWO:
                 outFile << "ENQ_TRY_CAS_TWO__";
+                break;
+            case ACTION::ENQ_TAIL_NEXT_NOT_NULL:
+                outFile << "ENQ_TAIL_NEXT_NOT_NULL";
                 break;
             case ACTION::DEQ_START:
                 outFile << "DEQ_START__________";
@@ -165,8 +229,14 @@ void handler(void)
             case ACTION::DEQ_EMPTY:
                 outFile << "DEQ_EMPTY________";
                 break;
+            case ACTION::DEQ_TRY_NULL_CHECK:
+                outFile << "DEQ_TRY_NULL_CHECK";
+                break;
             case ACTION::DEQ_FAIL_NO_VALUE:
                 outFile << "DEQ_FAIL_NO_VALUE";
+                break;
+            case ACTION::DEQ_TRY_CAS_BEFORE:
+                outFile << "DEQ_TRY_CAS_BEFORE";
                 break;
             case ACTION::DEQ_TRY_CAS:
                 outFile << "DEQ_TRY_CAS______";
@@ -177,7 +247,7 @@ void handler(void)
             case ACTION::END:
                 break;
             default:
-                outFile << "\t\t";
+                outFile << "   \t\t";
                 break;
             }
 
@@ -318,7 +388,7 @@ int main(void)
 {
     InitializeCriticalSection(&cs);
 
-    const int ThreadCnt = 1;
+    const int ThreadCnt = 2;
     HANDLE hHandle[ThreadCnt + 1];
 
     for (int i = 1; i <= ThreadCnt; ++i) {
