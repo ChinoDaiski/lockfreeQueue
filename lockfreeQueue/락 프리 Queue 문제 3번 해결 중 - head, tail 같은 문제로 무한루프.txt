@@ -22232,7 +22232,19 @@ enq에서 tail 값이 nullptr인 문제가 발생함.
 deq에서 이런 작업을 한다면, enq를 동시에 진행할 경우 어떤 문제가 발생하는가?
 deq에서 head와 tail이 같다면 tail값을 next로 옮김. 그런데 사이즈가 0인 상황은 정상적인 상황임. 그럼 사이즈가 0이 아닐때 head와 tail이 같다면 문제가 되겠네?
 
-deq시 사이즈가 0이 아닌데, 
+
+
+문제는 tail 값이 옮겨지지 않았음에도 head를 옮기는 것. 
+deq 후 size가 0이 아니라면 tail값을 옮겨줌? 안됨, 여러 스레드가 동시에 deq하는 상황이라면 보장이 안되기에 실패.
+그러면 deq 시도 전에 tail값을 확인해서 tail의 next가 nullptr 이 아니라면 옮긴다면?
+
+
+
+
+현재 deq시 tail 값을 가져와서 tail의 next가 NULL이 아니라면 CAS 후 continue하는 방식으로 deq 하기 전에 tail을 무조건 확인하고 시도하고 있음.
+20분 테스트 해본 결과 문제는 없지만 계속 반복해서 테스트 해볼 것.
+
+
 
 
 
