@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iomanip>
 
+#include <tbb/concurrent_queue.h>
 #include "lockfree_queue.h"
 
 
@@ -13,6 +14,7 @@ bool bExitMonitor = false;
 
 // 글로벌 스택 인스턴스
 lockfree_queue<int> g_Queue;
+//tbb::concurrent_queue<int> g_Queue;  // 정수형 큐 선언
 
 UINT32 thread_cnt = -1;
 CircularQueue<DebugNode>* g_circularQueue[10];
@@ -311,7 +313,7 @@ unsigned int WINAPI Worker1(void* pArg) {
     g_circularQueue[threadCnt] = &thread_debugQueue;
     threadIDs[threadCnt] = GetCurrentThreadId();
 
-    const int cnt = 5;// rand() % 1000;
+    const int cnt = 10000;// rand() % 1000;
 
     while (!bExitWorker) {
         for (int i = 0; i < cnt; ++i) {
@@ -338,7 +340,7 @@ unsigned int WINAPI Worker2(void* pArg) {
     g_circularQueue[threadCnt] = &thread_debugQueue;
     threadIDs[threadCnt] = GetCurrentThreadId();
 
-    const int cnt = 3;// rand() % 1000;
+    const int cnt = 10000;// rand() % 1000;
 
     while (!bExitWorker) {
         for (int i = 0; i < cnt; ++i) {
@@ -371,6 +373,7 @@ unsigned int WINAPI MonitorThread(void* pArg)
 
         std::cout << "CurPoolCount : " << g_Queue.GetCurPoolCount() << "\n";
         std::cout << "MaxPoolCount : " << g_Queue.GetMaxPoolCount() << "\n";
+        std::cout << "MaxRepeat : " << g_Queue.maxRepeat << "\n";
 
         std::cout << "===================================\n\n";
 
@@ -388,12 +391,12 @@ int main(void)
 {
     InitializeCriticalSection(&cs);
 
-    const int ThreadCnt = 2;
+    const int ThreadCnt = 4;
     HANDLE hHandle[ThreadCnt + 1];
 
-    for (int i = 1; i <= ThreadCnt; ++i) {
+    for (int i = 1; i <= ThreadCnt; i += 2) {
         hHandle[i] = (HANDLE)_beginthreadex(NULL, 0, Worker1, NULL, 0, NULL);
-        hHandle[i] = (HANDLE)_beginthreadex(NULL, 0, Worker2, NULL, 0, NULL);
+        hHandle[i + 1] = (HANDLE)_beginthreadex(NULL, 0, Worker2, NULL, 0, NULL);
     }
     // 모니터 스레드 생성
     hHandle[0] = (HANDLE)_beginthreadex(NULL, 0, MonitorThread, NULL, 0, NULL);

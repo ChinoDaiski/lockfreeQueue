@@ -344,6 +344,9 @@ public:
 
             UINT32 index = InterlockedIncrement(&bRepeat);
 
+            if (maxRepeat < index)
+                maxRepeat = index;
+
             if (bRepeat >= 1000)
             {
                 logQueue.Stop();
@@ -650,5 +653,7 @@ public:
     UINT64 _tail;
 
     UINT64 bError;
+
+    UINT64 maxRepeat = 0;
 };
 

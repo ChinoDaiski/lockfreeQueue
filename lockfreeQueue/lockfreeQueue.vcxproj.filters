@@ -23,6 +23,9 @@
     <ClCompile Include="CircularQueue.cpp">
       <Filter>소스 파일\CircularQueue</Filter>
     </ClCompile>
+    <ClCompile Include="test.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="concurrent_stack.h">
